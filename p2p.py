@@ -2,9 +2,9 @@
 from server_client.constants import *
 from server_client.client import Client
 from server_client.server import Server
-import fileIO
 import hashlib
-
+import fileIO
+import pickle
 """
     This class will take care of converting client to server
 """
@@ -17,33 +17,31 @@ def main():
 
     # TODO After hashing, we store the hash with a key of IP addresses locally into the client or server
     # TODO Also, to parse through the list of hashes that are stored in the hash table
-
-    # test directories
-    cwd = os.getcwd()
-    path_to_file = os.path.join(cwd, "read_file.txt") # temporary for file path of new
-    new_file_path = os.path.join(cwd, "new_file.txt") # temporary for new storage
-
-    msg = fileIO.convert_to_bytes(path_to_file)
-
-    # this is to hash the file at the specified location
-    file_hash = hashlib.sha256()
-    with open(path_to_file, 'rb') as f:
-        fb = f.read(BYTE_SIZE)
-        while len(fb) >0:
-            fb = f.read(BYTE_SIZE)
-    print("file hash hex: ",file_hash.hexdigest())
-    hex = file_hash.hexdigest()
-
-    # this is to store it in the hash table
-    
-    hash = {'hex':HOST}
-    
+    # msg = fileIO.convert_to_bytes("read_file.txt")
     # TODO: Then we must compare the hash tables between different nodes in the system
     # with a for loop and update the files associated with the missing hashes in the hash tables
 
+    # This will create shared folder so that it can start hashing the uploaded files
+    fileIO.create_folder()
+    hashlist = fileIO.update_uploaded_files()
 
 
+    msg = pickle.dumps(hashlist)
 
+    recd = pickle.loads(msg)
+    print(recd)
+
+    """
+    for item in hashlist:
+        print(item)
+    dbfile.close()
+    """
+    #msg = bytes(f'{len(msg):<{10}}', "utf-8") + msg
+    print(msg)
+    #msg = msg.decode('utf-8')
+    d = pickle.load(msg)
+    print(d)
+    # print(msg.decode("utf-8"))
     while True:
         try:
             print("-" * 21 + "Trying to connect" + "-" * 21)
@@ -51,12 +49,12 @@ def main():
             time.sleep(randint(RAND_TIME_START,RAND_TIME_END))
             for peer in p2p.peers:
                 try:
-                    client = Client(peer)
+                    client = Client(peer,hashlist)
+                    
                 except KeyboardInterrupt:
                     sys.exit(0)
                 except:
                     pass
-
                 # become the server
                 try:
                     server = Server(msg)

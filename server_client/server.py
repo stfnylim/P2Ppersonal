@@ -7,7 +7,7 @@ from server_client.constants import *
 class Server: 
 
 
-    def __init__(self, msg):
+    def __init__(self,msg):
         try:
             # the message to upload in bytes
             self.msg = msg
@@ -24,7 +24,7 @@ class Server:
 
             # server is listening for any connections
             self.s.listen(1)
-            print("-" * 12+ "Server Running"+ "-" *21)
+            print("=" * 10 + "Server Running"+ "=" *10)
             self.run()
         except Exception as e:
             sys.exit()
